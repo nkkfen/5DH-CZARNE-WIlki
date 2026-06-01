@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INF02 – Notatki Egzaminacyjne</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #2a2f45;
+    --accent: #5b6af0;
+    --accent2: #00d4aa;
+    --accent3: #f0a05b;
+    --accent4: #e05b8a;
+    --text: #e2e6f3;
+    --muted: #7a84a8;
+    --highlight: #5b6af022;
+    --tag-bg: #1e2540;
+    --tag-border: #2d3660;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* === HEADER === */
+  header {
+    padding: 2rem 2rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0a0c12 0%, var(--bg) 100%);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.03em;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* === SEARCH + AUTOCOMPLETE === */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 1.1rem;
+    max-width: 640px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #searchInput {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  #searchInput:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--highlight);
+  }
+
+  #searchInput::placeholder { color: var(--muted); }
+
+  /* Autocomplete dropdown */
+  #autocomplete {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #1a1f30;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 0 8px 24px #00000066;
+    display: none;
+  }
+
+  .ac-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: background 0.1s;
+  }
+
+  .ac-item:hover, .ac-item.focused {
+    background: var(--highlight);
+    color: var(--accent);
+  }
+
+  .ac-item .ac-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .ac-item mark {
+    background: transparent;
+    color: var(--accent3);
+    font-weight: 700;
+    padding: 0;
+  }
+
+  /* === TAGS BAR === */
+  .tags-section {
+    margin-top: 0.5rem;
+  }
+
+  .tags-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .tag-group-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 70px;
+    opacity: 0.6;
+  }
+
+  .tag-filter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 4px;
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .tag-filter:hover { border-color: var(--accent); color: var(--text); }
+
+  .tag-filter.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Special exam tags */
+  .tag-filter[data-tag="egzamin-teoretyczny"] { border-color: #3a7bd5; color: #7ab3f5; }
+  .tag-filter[data-tag="egzamin-praktyczny"]  { border-color: #2ea87e; color: #5dd4ad; }
+  .tag-filter[data-tag="egzamin-teoretyczny"].active { background: #3a7bd5; border-color: #3a7bd5; color: #fff; }
+  .tag-filter[data-tag="egzamin-praktyczny"].active  { background: #2ea87e; border-color: #2ea87e; color: #fff; }
+
+  .tag-filter.clear-btn {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .tag-filter.clear-btn:hover { border-color: #e05b5b; color: #e05b5b; }
+
+  /* === LAYOUT === */
+  .main { padding: 1.5rem 2rem; }
+
+  .results-info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    min-height: 1rem;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+
+  /* === NOTE CARD === */
+  .note-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .note-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .note-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .note-card:hover::before { opacity: 1; }
+  .note-card.hidden { display: none; }
+
+  /* === RICH card (has versions/lists) === */
+  .note-card.rich {
+    border-color: #2a3050;
+    background: #161b28;
+  }
+
+  .note-card.rich::before { background: var(--accent3); }
+  .note-card.rich:hover { border-color: var(--accent3); }
+  .note-card.rich:hover::before { opacity: 1; }
+
+  .note-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .note-card.rich .note-title {
+    color: var(--accent3);
+  }
+
+  .note-body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* === NOTE TAGS (on card) === */
+  .note-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.85rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .note-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    padding: 0.18rem 0.45rem;
+    border-radius: 3px;
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+
+  .note-tag:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Exam tags on card */
+  .note-tag[data-tag="egzamin-teoretyczny"] {
+    border-color: #2a4a7a;
+    color: #5a9ad5;
+    background: #0e1826;
+  }
+  .note-tag[data-tag="egzamin-praktyczny"] {
+    border-color: #1a5a42;
+    color: #3dbd8e;
+    background: #0a1e18;
+  }
+  /* Protocol tag */
+  .note-tag[data-tag="protokół"] {
+    border-color: #4a2d6a;
+    color: #b07de0;
+    background: #18102a;
+  }
+
+  /* Rich-card icon badge */
+  .rich-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    background: #f0a05b22;
+    border: 1px solid #f0a05b55;
+    color: var(--accent3);
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    letter-spacing: 0.05em;
+  }
+
+  /* Highlight match */
+  mark {
+    background: #f0a05b33;
+    color: var(--accent3);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  /* No results */
+  .no-results {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 1.25rem 1rem 1rem; }
+    .main { padding: 1rem; }
+    h1 { font-size: 1.5rem; }
+    .notes-grid { grid-template-columns: 1fr; }
+    .tag-group-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>INF<span>02</span></h1>
+    <span class="subtitle">// notatki egzaminacyjne</span>
+  </div>
+
+  <div class="search-wrapper">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="searchInput" placeholder="Szukaj notatki lub wpisz tag..." autocomplete="off" spellcheck="false">
+    <div id="autocomplete"></div>
+  </div>
+
+  <div class="tags-section">
+    <div class="tags-groups" id="tagsGroups"></div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="results-info" id="resultsInfo"></div>
+  <div class="notes-grid" id="notesGrid">
+    <div class="no-results" id="noResults">Brak wyników dla podanej frazy lub tagu.</div>
+  </div>
+</main>
+
+<script>
+// rich=true → rozbudowana notatka z wersjami/listami wartości
+const NOTES = [
+  {
+    title: "Kable miedziane – rodzaje",
+    body: `UTP (Unshielded Twisted Pair) – skrętka nieekranowana, najczęściej stosowana w LAN (Ethernet).
+STP (Shielded Twisted Pair) – skrętka ekranowana, chroni przed zakłóceniami elektromagnetycznymi.
+FTP (Foiled Twisted Pair) – skrętka z folią ekranową wokół pary przewodów lub całego kabla.
+
+Oznaczenia ekranowania:
+  U – brak ekranowania
+  F – ekran z folii
+  S – ekran z oplotu (siatki metalowej)`,
+    tags: ["okablowanie","sieć","normy","LAN","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Kabel prosty vs krosowy",
+    body: `Kabel prosty (straight-through) – do łączenia urządzenia końcowego (PC) z przełącznikiem lub routerem.
+Kabel krosowy (crossover) – do łączenia dwóch urządzeń tego samego typu (PC–PC, switch–switch).`,
+    tags: ["okablowanie","sieć","LAN","egzamin-teoretyczny"]
+  },
+  {
+    title: "Kable koncentryczne",
+    body: `Dawniej używane w sieciach Ethernet (np. 10BASE2, 10BASE5).
+Rodzaje: RG-6, RG-58 (różnią się impedancją i zastosowaniem).`,
+    tags: ["okablowanie","sieć","historia","egzamin-teoretyczny"]
+  },
+  {
+    title: "ping / ICMP",
+    body: `ping używa protokołu ICMP.
+ICMP służy do diagnostyki i kontroli sieci:
+  – Sprawdza dostępność hosta (ping)
+  – Informuje o błędach w transmisji
+  – Testowanie połączenia
+Atak polegający na przechwytywaniu pakietów ICMP to sniffing.`,
+    tags: ["komenda-windows","komenda-linux","sieć","protokół","diagnostyka","egzamin-teoretyczny","egzamin-praktyczny"]
+  },
+  {
+    title: "Enkapsulacja",
+    body: `Enkapsulacja – dodaje do danych nagłówki z informacjami (na każdej warstwie modelu ISO OSI).`,
+    tags: ["sieć","ISO-OSI","egzamin-teoretyczny"]
+  },
+  {
+    title: "Multipleksacja",
+    body: `Multipleksacja – łączy wiele strumieni danych w jeden kanał transmisji.`,
+    tags: ["sieć","transmisja","egzamin-teoretyczny"]
+  },
+  {
+    title: "Koncentrator (Hub)",
+    body: `Koncentrator – urządzenie fizyczne, które przesyła dane do wszystkich portów naraz. Zastąpiły go switche.`,
+    tags: ["sieć","hardware","historia","egzamin-teoretyczny"]
+  },
+  {
+    title: "Kabel światłowodowy – zasada",
+    body: `Kabel światłowodowy musi zaczynać się min. 30 m od źródła światła.`,
+    tags: ["okablowanie","światłowód","egzamin-teoretyczny"]
+  },
+  {
+    title: "arp -a",
+    body: `arp -a – wyświetla tabelę translacji ARP (IP → MAC) w systemie Windows.`,
+    tags: ["komenda-windows","sieć","protokół","egzamin-praktyczny"]
+  },
+  {
+    title: "ARP – protokół",
+    body: `ARP – tłumacz IP → MAC, działa tylko w sieci lokalnej.
+Komenda arp pokazuje i edytuje tę „książkę adresową".`,
+    tags: ["sieć","protokół","komenda-windows","komenda-linux","egzamin-teoretyczny"]
+  },
+  {
+    title: "FDDI",
+    body: `FDDI – stary światłowodowy sposób przesyłu, działający w topologii podwójnego pierścienia.`,
+    tags: ["okablowanie","światłowód","historia","topologia","egzamin-teoretyczny"]
+  },
+  {
+    title: "ATAPI",
+    body: `ATAPI – rozszerzenie wejścia ATA (IDE) umożliwiające podłączenie tam urządzeń pamięci masowej, ale nie dysków twardych.`,
+    tags: ["hardware","interfejsy","egzamin-teoretyczny"]
+  },
+  {
+    title: "SCSI",
+    body: `SCSI – wydajny interfejs do podłączania dysków i innych urządzeń. Używany tylko w serwerach.`,
+    tags: ["hardware","interfejsy","serwery","egzamin-teoretyczny"]
+  },
+  {
+    title: "Dysk SAS",
+    body: `Dysk SAS – dysk przeznaczony do serwerów (Serial Attached SCSI).`,
+    tags: ["hardware","serwery","egzamin-teoretyczny"]
+  },
+  {
+    title: "Traktor w drukarce",
+    body: `Traktor w drukarce – wałek przeżuwający papier (mechanizm podawania papieru).`,
+    tags: ["hardware","drukarki","egzamin-teoretyczny"]
+  },
+  {
+    title: "Partycjonowanie – MBR vs GPT",
+    body: `MBR (Master Boot Record):
+  – Stary standard (od lat 80.)
+  – Maks. 4 partycje podstawowe
+  – Obsługuje dyski do 2 TB
+  – Partycja rozszerzona z logicznymi – obejście limitu 4
+
+GPT (GUID Partition Table):
+  – Nowszy standard, wymagany przy UEFI
+  – Obsługuje dyski > 2 TB
+  – Praktycznie nieograniczona liczba partycji (zwykle do 128 w Windows)
+  – Każda partycja ma unikalny GUID
+  – Bardziej niezawodny (kopie zapasowe tabeli partycji)`,
+    tags: ["hardware","dyski","system-operacyjny","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Typy partycji MBR",
+    body: `Primary (podstawowa) – partycja główna, z której można bootować system.
+Extended (rozszerzona) – „kontener" dla partycji logicznych, obejście limitu 4 partycji.
+Logical (logiczna) – partycje wewnątrz rozszerzonej, do przechowywania danych.`,
+    tags: ["hardware","dyski","system-operacyjny","egzamin-teoretyczny"]
+  },
+  {
+    title: "Ośrodki procesora",
+    body: `FPU (Floating Point Unit) – operacje zmiennoprzecinkowe
+ALU (Arithmetic Logic Unit) – normalne operacje arytmetyczne i logiczne`,
+    tags: ["hardware","CPU","egzamin-teoretyczny"]
+  },
+  {
+    title: "PCI Express",
+    body: `PCI Express używa magistrali asynchronicznej Full Duplex.`,
+    tags: ["hardware","interfejsy","przepustowości","egzamin-teoretyczny"]
+  },
+  {
+    title: "RAMDAC",
+    body: `RAMDAC – powoduje, że karta graficzna wyświetla sygnał wizualnie (konwertuje cyfrowy sygnał na analogowy).`,
+    tags: ["hardware","karta-graficzna","egzamin-teoretyczny"]
+  },
+  {
+    title: "S.M.A.R.T.",
+    body: `S.M.A.R.T. – działa do testu dysków twardych.
+Sprawdzenie w CrystalDisk lub CMD:
+  wmic diskdrive get status`,
+    tags: ["hardware","dyski","diagnostyka","komenda-windows","egzamin-praktyczny"]
+  },
+  {
+    title: "CIDR",
+    body: `CIDR – metoda adresacji IP bez klas A/B/C, z dowolną długością maski sieciowej.
+Zapis: adres_IP / liczba_bitów_sieci
+Przykład: 192.168.1.0/27`,
+    tags: ["sieć","adresacja-IP","egzamin-teoretyczny"]
+  },
+  {
+    title: "Standardy Wi-Fi – 802.11",
+    body: `802.11b – 2,4 GHz | maks. 11 Mb/s | duży zasięg | przestarzały
+802.11a – 5 GHz | maks. 54 Mb/s | mniejszy zasięg
+802.11g – 2,4 GHz | maks. 54 Mb/s | zgodność z 802.11b
+802.11n (Wi-Fi 4) – 2,4/5 GHz | maks. 600 Mb/s | MIMO
+802.11ac (Wi-Fi 5) – 5 GHz | kilka Gb/s | MU-MIMO
+802.11ax (Wi-Fi 6/6E) – 2,4/5/6 GHz | bardzo wysoka wydajność`,
+    tags: ["sieć","WiFi","przepustowości","IEEE","bezprzewodowe","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "DMA",
+    body: `DMA (Direct Memory Access) – technika transmisji danych w trybie bezpośredniego dostępu do pamięci (bez angażowania CPU).`,
+    tags: ["hardware","pamięć","egzamin-teoretyczny"]
+  },
+  {
+    title: "Tester okablowania",
+    body: `Tester okablowania strukturalnego pozwala sprawdzić mapę połączeń.`,
+    tags: ["okablowanie","diagnostyka","narzędzia","egzamin-praktyczny"]
+  },
+  {
+    title: "Samba",
+    body: `Samba – pozwala na współpracę Linuxa z Windows (udostępnianie plików i drukarek w sieci).`,
+    tags: ["linux","sieć","serwery","egzamin-praktyczny"]
+  },
+  {
+    title: "Nóż uderzeniowy (LSA)",
+    body: `Nóż uderzeniowy – wciskacz LSA – narzędzie do montażu kabli (wciskanie żył kabla do złącza keystone).`,
+    tags: ["okablowanie","narzędzia","egzamin-praktyczny"]
+  },
+  {
+    title: "IGMP",
+    body: `Protokół IGMP wykorzystuje się do wejścia i wyjścia z grupy rozgłoszeniowej (multicast).`,
+    tags: ["sieć","protokół","egzamin-teoretyczny"]
+  },
+  {
+    title: "id",
+    body: `id – komenda Linux do wyświetlenia numeru ID użytkownika.`,
+    tags: ["komenda-linux","użytkownicy","egzamin-praktyczny"]
+  },
+  {
+    title: "quota",
+    body: `quota – mechanizm limitów dyskowych, pozwalający zarządzać wykorzystaniem zasobów dyskowych przez użytkowników.`,
+    tags: ["linux","dyski","użytkownicy","egzamin-praktyczny"]
+  },
+  {
+    title: "Interfejs AGP",
+    body: `Interfejs AGP (dla starych kart graficznych) – działa równolegle.
+Na płycie głównej AGP jest zawsze odwrócone i lekko przesunięte względem PCI.`,
+    tags: ["hardware","interfejsy","karta-graficzna","historia","egzamin-teoretyczny"]
+  },
+  {
+    title: "md",
+    body: `md – komenda Windows tworząca folder (katalog).`,
+    tags: ["komenda-windows","egzamin-praktyczny"]
+  },
+  {
+    title: "ISA Server",
+    body: `ISA Server – pełni funkcje firewalla (Microsoft Internet Security and Acceleration Server).`,
+    tags: ["sieć","bezpieczeństwo","serwery","windows","egzamin-teoretyczny"]
+  },
+  {
+    title: "Przesłuch zbliżny / zdalny",
+    body: `Przesłuch zbliżny (NEXT) – sygnał w jednym kablu zakłóca drugi (po stronie nadawczej).
+Przesłuch zdalny (FEXT) – zakłóca drugą stronę kabla.
+Przenik – kable zakłócają się nawzajem.
+Miarą w decybelach będącą różnicą mocy sygnału zakłócającego i zakłócanego jest przesłuch zbliżny.`,
+    tags: ["okablowanie","diagnostyka","normy","egzamin-teoretyczny"]
+  },
+  {
+    title: "Topologia hierarchiczna",
+    body: `Topologia hierarchiczna – sieć zorganizowana w poziomy (np. core → dystrybucja → dostęp).`,
+    tags: ["sieć","topologia","egzamin-teoretyczny"]
+  },
+  {
+    title: "Squid",
+    body: `Squid – serwer proxy (Linux/Windows).`,
+    tags: ["linux","sieć","serwery","egzamin-teoretyczny"]
+  },
+  {
+    title: "DSP",
+    body: `DSP – mikroprocesor karty dźwiękowej (Digital Signal Processor).`,
+    tags: ["hardware","audio","egzamin-teoretyczny"]
+  },
+  {
+    title: "Skaner – oświetlenie",
+    body: `W skanerze do oświetlenia służą diody LED, nie świetlówka.`,
+    tags: ["hardware","skanery","egzamin-teoretyczny"]
+  },
+  {
+    title: "Średni czas dostępu HDD",
+    body: `Średni czas dostępu w dyskach twardych = suma średniego czasu wyszukiwania i opóźnienia obrotowego.`,
+    tags: ["hardware","dyski","egzamin-teoretyczny"]
+  },
+  {
+    title: "CISC vs RISC",
+    body: `CISC – dużo rozkazów, wiele cykli → wolniejszy
+RISC – mało rozkazów (wiele działań w jednym poleceniu), mała liczba cykli → szybszy`,
+    tags: ["hardware","CPU","egzamin-teoretyczny"]
+  },
+  {
+    title: "BHP – monitor i oświetlenie",
+    body: `Zalecana odległość od monitora: 40–75 cm.
+Poziom oświetlenia na biurku podczas pracy: 300–500 lx.`,
+    tags: ["BHP","normy","egzamin-teoretyczny"]
+  },
+  {
+    title: "Prefetching",
+    body: `Prefetching (prefetch) – technika wcześniejszego pobierania danych lub instrukcji do pamięci podręcznej (cache), zanim procesor faktycznie ich potrzebuje.`,
+    tags: ["hardware","CPU","pamięć","egzamin-teoretyczny"]
+  },
+  {
+    title: "Synaptic",
+    body: `Synaptic – graficzny menedżer pakietów Linux (nakładka na apt).`,
+    tags: ["linux","oprogramowanie","egzamin-praktyczny"]
+  },
+  {
+    title: "Rejestr HKCR",
+    body: `HKCR (HKEY_CLASSES_ROOT) – zawiera informacje dot. powiązań między typami plików a aplikacjami.`,
+    tags: ["windows","rejestr","egzamin-teoretyczny"]
+  },
+  {
+    title: "pagefile.sys",
+    body: `pagefile.sys – plik stronicowania. RAM przenosi do niego zbędne informacje (pamięć wirtualna).`,
+    tags: ["windows","pamięć","system-operacyjny","egzamin-teoretyczny"]
+  },
+  {
+    title: "NTFS – szyfrowanie",
+    body: `Pliki w NTFS są szyfrowane przy każdym zapisie (EFS – Encrypting File System).`,
+    tags: ["windows","bezpieczeństwo","system-plików","egzamin-teoretyczny"]
+  },
+  {
+    title: "Rejestr HKCU",
+    body: `HKCU (HKEY_CURRENT_USER) – zawiera informacje dotyczące aktualnie zalogowanego użytkownika.`,
+    tags: ["windows","rejestr","egzamin-teoretyczny"]
+  },
+  {
+    title: "AppLocker",
+    body: `AppLocker – tworzy reguły uruchamiania programów (polityki ograniczania oprogramowania w Windows).`,
+    tags: ["windows","bezpieczeństwo","active-directory","egzamin-teoretyczny"]
+  },
+  {
+    title: "plik hosts (Windows)",
+    body: `Plik hosts w Windows służy do zmiany nazw hostów na adresy IP (lokalne DNS).`,
+    tags: ["windows","sieć","DNS","egzamin-teoretyczny","egzamin-praktyczny"]
+  },
+  {
+    title: "MBR – definicja",
+    body: `MBR – główny rekord rozruchowy (Master Boot Record). Pierwszy sektor dysku, zawierający kod startowy systemu.`,
+    tags: ["hardware","dyski","system-operacyjny","egzamin-teoretyczny"]
+  },
+  {
+    title: "Ścieżka partycji slave Linux",
+    body: `/dev/hdb5 albo /dev/sda1 – ścieżka partycji slave w Linux.`,
+    tags: ["linux","dyski","system-plików","egzamin-praktyczny"]
+  },
+  {
+    title: "Licencja Personal (Office)",
+    body: `„Personal" w nazwie pakietu Microsoft Office oznacza niekomercyjność licencji.`,
+    tags: ["licencje","oprogramowanie","egzamin-teoretyczny"]
+  },
+  {
+    title: "redircmp",
+    body: `redircmp – komenda zmieniająca domyślną grupę organizacyjną komputerów w Active Directory.`,
+    tags: ["komenda-windows","active-directory","egzamin-praktyczny"]
+  },
+  {
+    title: "pwd",
+    body: `pwd – komenda Linux sprawdzająca, gdzie aktualnie znajduje się użytkownik (print working directory).`,
+    tags: ["komenda-linux","egzamin-praktyczny"]
+  },
+  {
+    title: "bcdedit",
+    body: `bcdedit – komenda Windows do zarządzania rozruchem systemu (BCD – Boot Configuration Data).`,
+    tags: ["komenda-windows","system-operacyjny","egzamin-praktyczny"]
+  },
+  {
+    title: "cipher",
+    body: `cipher – komenda Windows do szyfrowania plików NTFS (EFS).`,
+    tags: ["komenda-windows","bezpieczeństwo","system-plików","egzamin-praktyczny"]
+  },
+  {
+    title: "gparted",
+    body: `gparted – program Linux do edycji partycji (graficzny).`,
+    tags: ["linux","dyski","narzędzia","egzamin-praktyczny"]
+  },
+  {
+    title: "iostat",
+    body: `iostat – komenda Linux wyświetlająca poziom wykorzystania procesora i wejścia/wyjścia.`,
+    tags: ["komenda-linux","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "DSRM",
+    body: `DSRM (Directory Services Restore Mode) – zmiana lub reset hasła administratora domeny Active Directory.`,
+    tags: ["windows","active-directory","bezpieczeństwo","egzamin-praktyczny"]
+  },
+  {
+    title: "rediuser",
+    body: `rediuser – komenda zmieniająca domyślny kontener na użytkowników w Active Directory.`,
+    tags: ["komenda-windows","active-directory","egzamin-praktyczny"]
+  },
+  {
+    title: "dcdiag",
+    body: `dcdiag – komenda do diagnostyki i konfiguracji Active Directory (kontroler domeny).`,
+    tags: ["komenda-windows","active-directory","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "IIS",
+    body: `IIS (Internet Information Services) – służy do hostowania stron WWW na serwerze Windows.`,
+    tags: ["windows","serwery","www","egzamin-praktyczny"]
+  },
+  {
+    title: "RRAS",
+    body: `RRAS (Routing and Remote Access Service) – usługa sieciowa Windows do routingu i zdalnego dostępu.`,
+    tags: ["windows","sieć","VPN","serwery","egzamin-praktyczny"]
+  },
+  {
+    title: "Totem",
+    body: `Totem – odtwarzacz multimediów w środowisku GNOME (Linux).`,
+    tags: ["linux","oprogramowanie","egzamin-teoretyczny"]
+  },
+  {
+    title: "fsck",
+    body: `fsck – narzędzie Linux do naprawy i sprawdzania systemu plików.`,
+    tags: ["komenda-linux","dyski","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "NTLDR",
+    body: `NTLDR – stary program rozruchowy Windows (NT Loader). Wczytuje plik boot.ini, który startuje system.`,
+    tags: ["windows","system-operacyjny","historia","egzamin-teoretyczny"]
+  },
+  {
+    title: "RTC",
+    body: `RTC (Real Time Clock) – zegar w komputerze określający datę i godzinę (bateria CMOS).`,
+    tags: ["hardware","egzamin-teoretyczny"]
+  },
+  {
+    title: "OTP – zasilacz",
+    body: `Mechanizm zasilacza komputerowego chroniący przed przegrzaniem jest oznaczony jako zabezpieczenie OTP (Over Temperature Protection).`,
+    tags: ["hardware","zasilanie","BHP","egzamin-teoretyczny"]
+  },
+  {
+    title: "Norma PN-EN 50174 – rozplot UTP",
+    body: `Zgodnie z normą PN-EN 50174 rozplot kabla UTP nie powinien być większy niż 13 mm.`,
+    tags: ["normy","okablowanie","egzamin-teoretyczny"]
+  },
+  {
+    title: "Non-system disk error",
+    body: `Komunikat „Non-system disk or disk error. Replace and strike any key when ready" – przyczyną może być dyskietka włożona do napędu.`,
+    tags: ["diagnostyka","hardware","system-operacyjny","egzamin-teoretyczny"]
+  },
+  {
+    title: "Norma PN-EN 50174 – gniazda",
+    body: `PN-EN 50174 – Gniazdo komputerowe: 2× RJ45 na 10 m² powierzchni biura.`,
+    tags: ["normy","okablowanie","egzamin-teoretyczny"]
+  },
+  {
+    title: "dmidecode",
+    body: `dmidecode – komenda Linux wyświetlająca informacje o BIOS-ie i danych producenta systemu (tablice DMI).
+Użycie: dmidecode --type "nazwa_podzespołu"`,
+    tags: ["komenda-linux","diagnostyka","hardware","egzamin-praktyczny"]
+  },
+  {
+    title: "Tablice DMI",
+    body: `Tablice DMI – spis specyfikacji pisany przez producentów sprzętu (wczytywany przez BIOS/UEFI).`,
+    tags: ["hardware","diagnostyka","egzamin-teoretyczny"]
+  },
+  {
+    title: "lshw",
+    body: `lshw – komenda Linux – aktualny stan podzespołów komputera i jądra.
+Użycie: lshw -C "podzespol_po_angielsku"`,
+    tags: ["komenda-linux","diagnostyka","hardware","egzamin-praktyczny"]
+  },
+  {
+    title: "Podstawowe komendy Linux – tworzenie i zarządzanie",
+    body: `mkdir nazwa_katalogu – tworzy katalog
+mkdir -p katalog/podkatalog/... – tworzy drzewo katalogów (opcja -p)
+touch nazwa_pliku.txt – tworzy pusty plik
+touch plik1.txt plik2.txt – wiele plików naraz
+touch .ukryty_plik – plik ukryty (kropka na początku)
+cd ścieżka – poruszanie się
+cd .. – katalog wyżej
+cd ~ lub cd – katalog domowy
+ls -l – zawartość ze szczegółami
+ls -la – z ukrytymi plikami
+tree lub find . – drzewo katalogów
+
+Przykład egzaminacyjny:
+  mkdir -p ~/egzamin/projekt/dokumenty
+  cd ~/egzamin/projekt/dokumenty
+  touch notatka.txt lista.doc`,
+    tags: ["komenda-linux","system-plików","egzamin-praktyczny"],
+    rich: true
+  },
+  {
+    title: "IPv4 – długość adresu",
+    body: `Adres IPv4 ma długość 32 bitów (4 oktety).`,
+    tags: ["sieć","adresacja-IP","egzamin-teoretyczny"]
+  },
+  {
+    title: "ipconfig /displaydns",
+    body: `ipconfig /displaydns – komenda Windows do wyświetlenia zapisanych adresów DNS w pamięci podręcznej.`,
+    tags: ["komenda-windows","sieć","DNS","egzamin-praktyczny"]
+  },
+  {
+    title: "POP",
+    body: `POP (Post Office Protocol) – służy do odbierania poczty e-mail z serwera na komputer lokalny.`,
+    tags: ["sieć","protokół","poczta","egzamin-teoretyczny"]
+  },
+  {
+    title: "Lupa Windows",
+    body: `Lupa Windows nie posiada trybu „płynny".`,
+    tags: ["windows","dostępność","egzamin-teoretyczny"]
+  },
+  {
+    title: "Licencja OEM",
+    body: `Licencja OEM (Original Equipment Manufacturer) – przypisana do konkretnego sprzętu.
+Licencja OEM nie pozwala na przeniesienie na inną płytę główną o lepszych parametrach.`,
+    tags: ["licencje","windows","egzamin-teoretyczny"]
+  },
+  {
+    title: "Defragmentacja",
+    body: `Aby uporządkować pliki na dysku w celu przyspieszenia pracy systemu, należy wykonać defragmentację.`,
+    tags: ["windows","dyski","system-operacyjny","egzamin-teoretyczny"]
+  },
+  {
+    title: "OCR",
+    body: `OCR – program/technologia, która wypisuje (rozpoznaje) tekst z grafik/obrazów.`,
+    tags: ["oprogramowanie","skanery","egzamin-teoretyczny"]
+  },
+  {
+    title: "tar -zcvf",
+    body: `tar -zcvf – komenda Linux tworząca skompresowane archiwum (.tar.gz).
+tar -xvf – rozpakowuje archiwum.`,
+    tags: ["komenda-linux","system-plików","egzamin-praktyczny"]
+  },
+  {
+    title: "Katalog /home w Fedorze",
+    body: `W systemie Fedora katalogi domowe użytkowników umieszczone są w katalogu /home.`,
+    tags: ["linux","system-plików","egzamin-teoretyczny"]
+  },
+  {
+    title: "top",
+    body: `top – monitorowanie w czasie rzeczywistym uruchomionych procesów i programów.`,
+    tags: ["komenda-linux","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "Nagios",
+    body: `Nagios – program do monitorowania urządzeń sieciowych.`,
+    tags: ["sieć","oprogramowanie","diagnostyka","egzamin-teoretyczny"]
+  },
+  {
+    title: "Archiwizacja danych – schemat GFS",
+    body: `Dziadek – kopia miesięczna
+Ojciec – kopia tygodniowa
+Syn – kopia dzienna`,
+    tags: ["serwery","bezpieczeństwo","backup","egzamin-teoretyczny"]
+  },
+  {
+    title: "Windows 7 – minimalne wymagania RAM",
+    body: `Windows 7 wymaga minimum 1 GB RAM (dla wersji 32-bit).`,
+    tags: ["windows","system-operacyjny","egzamin-teoretyczny"]
+  },
+  {
+    title: "Moduł SFP",
+    body: `Moduł SFP – pozwala jednemu portowi w routerze / switchu obsługiwać różne typy połączeń (RJ45, światłowód jednomodowy, wielomodowy) bez zmiany sprzętu. Funkcję wybiera się przez wymianę modułu.`,
+    tags: ["sieć","hardware","światłowód","egzamin-teoretyczny"]
+  },
+  {
+    title: "gpedit.msc",
+    body: `gpedit.msc – Edytor zasad grupy Windows (Group Policy Editor). Ważne narzędzie!`,
+    tags: ["komenda-windows","windows","active-directory","egzamin-praktyczny"]
+  },
+  {
+    title: "gpresult /r",
+    body: `gpresult /r – podsumowanie uprawnień (polityk) przypisanych do użytkownika/komputera w domenie ADDS.`,
+    tags: ["komenda-windows","active-directory","egzamin-praktyczny"]
+  },
+  {
+    title: "netstat",
+    body: `netstat – wyświetla aktualne połączenia sieciowe i ich stany (np. LISTENING, ESTABLISHED).
+Uwaga: pokazuje połączenia, nie interfejsy.`,
+    tags: ["komenda-windows","komenda-linux","sieć","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "ip addr",
+    body: `ip addr – komenda Linux, nowszy i lepszy zamiennik ifconfig. Wyświetla interfejsy sieciowe.`,
+    tags: ["komenda-linux","sieć","egzamin-praktyczny"]
+  },
+  {
+    title: "Rejestry i pamięć procesora",
+    body: `Tranzystory – przechowują 0 lub 1
+Rejestry – przechowują aktualnie wykorzystywane informacje
+Cache – pliki, do których procesor ma szybszy dostęp
+
+Typy rejestrów:
+  GPR – rejestry ogólnego przeznaczenia (liczby, adresy, wyniki)
+  IR – rejestr instrukcji (aktualnie wykonywana instrukcja)
+  PC – licznik programu (następna instrukcja)
+  Rejestry flag – stan (zero, przepełnienie itp.)`,
+    tags: ["hardware","CPU","pamięć","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Hierarchia pamięci cache",
+    body: `Cache L1 – najszybsze
+Cache L2 – średnie
+Cache L3 – najwolniejsze
+
+Kolejność dostępu procesora:
+  Rejestr → L1 → L2 → L3 → RAM`,
+    tags: ["hardware","CPU","pamięć","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Licencja CDDL vs GPL",
+    body: `CDDL – to co zmodyfikujesz (konkretny plik) musisz udostępnić publicznie, reszta projektu niekoniecznie.
+GPL – „dotkniesz → wszystko musi być open source".`,
+    tags: ["licencje","egzamin-teoretyczny"]
+  },
+  {
+    title: "Rozdzielczość myszy a monitor",
+    body: `Jeżeli rozdzielczość myszy wynosi 200 DPI a monitora Full HD (1920×1080), to:
+  Szerokość ekranu / DPI = cale → 1 cal = 2,5 cm
+  Wymagany przesuw myszy w poprzek ekranu = 1920 / 200 = 9,6 cali ≈ 24 cm`,
+    tags: ["hardware","rozdzielczości","egzamin-teoretyczny"]
+  },
+  {
+    title: "Rekord A i CNAME (DNS)",
+    body: `Rekord A – mapuje domenę na adres IP.
+Alias (CNAME) – wariant domeny przekierowujący na inną nazwę.`,
+    tags: ["sieć","DNS","protokół","egzamin-teoretyczny"]
+  },
+  {
+    title: "RDP",
+    body: `RDP (Remote Desktop Protocol) – protokół pulpitu zdalnego Windows.`,
+    tags: ["windows","sieć","protokół","egzamin-teoretyczny","egzamin-praktyczny"]
+  },
+  {
+    title: "df / du",
+    body: `df – komenda Linux wyświetlająca wolne miejsce na dysku.
+du – komenda Linux wyświetlająca zajęte miejsce.`,
+    tags: ["komenda-linux","dyski","egzamin-praktyczny"]
+  },
+  {
+    title: "NNTP",
+    body: `NNTP – stary protokół grup dyskusyjnych (Usenet); wysyłanie i odbieranie postów między serwerem a użytkownikiem.`,
+    tags: ["sieć","protokół","historia","egzamin-teoretyczny"]
+  },
+  {
+    title: "IMAP",
+    body: `IMAP – aktualnie używany protokół poczty e-mail (przechowuje wiadomości na serwerze).`,
+    tags: ["sieć","protokół","poczta","egzamin-teoretyczny"]
+  },
+  {
+    title: "Bramka VoIP",
+    body: `Bramka VoIP – tłumaczy sieć telefoniczną GSM na sieć internetową.`,
+    tags: ["sieć","VoIP","protokół","egzamin-teoretyczny"]
+  },
+  {
+    title: "ADSL",
+    body: `ADSL – internet po kablu telefonicznym (miedziowym).`,
+    tags: ["sieć","transmisja","egzamin-teoretyczny"]
+  },
+  {
+    title: "DE-15/HD-15 – VGA",
+    body: `DE-15 / HD-15 – złącze VGA (15-pinowe).`,
+    tags: ["hardware","interfejsy","karta-graficzna","egzamin-teoretyczny"]
+  },
+  {
+    title: "SNMP",
+    body: `SNMP – pozwala na zdalne zarządzanie urządzeniami sieciowymi, pobieranie informacji o ich stanie i parametrach.
+SNMP v3 – najlepszy, z szyfrowaniem.`,
+    tags: ["sieć","protokół","serwery","egzamin-teoretyczny"]
+  },
+  {
+    title: "Find /c /v",
+    body: `/v – pokazuje linie, które NIE zawierają podanego tekstu (Windows).
+/c – liczy pasujące linijki.`,
+    tags: ["komenda-windows","egzamin-praktyczny"]
+  },
+  {
+    title: "Statyczne IP Linux – konfiguracja",
+    body: `sudo cp /usr/share/doc/netplan/examples/static.yaml /etc/netplan/50-cloud-init.yaml
+ip a
+nano /etc/netplan/50-cloud-init.yaml
+  – zmień nazwę karty (enp... → np. eth0 z ip addr)
+  – usuń linijkę search
+sudo netplan try
+sudo netplan apply`,
+    tags: ["linux","sieć","konfiguracja","egzamin-praktyczny"],
+    rich: true
+  },
+  {
+    title: "Protokoły VPN",
+    body: `PPTP – stary protokół VPN
+L2TP – tworzy tunel VPN bez szyfrowania
+IPsec – szyfrowanie VPN
+SSTP – VPN Microsoftu`,
+    tags: ["sieć","VPN","protokół","bezpieczeństwo","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "SIP",
+    body: `SIP – protokół obsługujący rozmowy telefoniczne przez VoIP.`,
+    tags: ["sieć","protokół","VoIP","egzamin-teoretyczny"]
+  },
+  {
+    title: "Zakresy klas adresowych – rymowanka",
+    body: `Sto, dwieście, siedem        → 100.–127.
+Sto dziewięćdziesiąt, jeden → 128.–191.
+Dwieście dwadzieścia, trzy  → 192.–223.
+Dwieście trzydzieści, dziewięć → 224.–239.
+
+Maski:
+  A – /8
+  B – /16
+  C – /24`,
+    tags: ["sieć","adresacja-IP","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "MIME",
+    body: `MIME – odczytuje rozszerzenia plików w sieci (określa typ zawartości).`,
+    tags: ["sieć","protokół","egzamin-teoretyczny"]
+  },
+  {
+    title: "NTP",
+    body: `NTP (Network Time Protocol) – pilnuje spójności godzin i stref czasowych w sieci.`,
+    tags: ["sieć","protokół","egzamin-teoretyczny"]
+  },
+  {
+    title: "EXT – system plików Linux",
+    body: `EXT (ext2, ext3, ext4) – system plików używany w Linux.`,
+    tags: ["linux","system-plików","egzamin-teoretyczny"]
+  },
+  {
+    title: "Normy PN-EN (projekt i montaż)",
+    body: `50173 – projekt, gniazda abonenckie i punkty rozdzielcze
+50174 – montaż, zakłócenia
+50310 – uziemienie i BHP
+50346 – testy`,
+    tags: ["normy","okablowanie","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Normy EIA/TIA (budynek i standardy)",
+    body: `607 – uziemienie i BHP
+568 – standardy kabli
+569 – gdzie montować kable
+606 – tworzenie oznaczeń
+942 – redundancja, serwerownie`,
+    tags: ["normy","okablowanie","serwery","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Rozszerzenie .man (Active Directory)",
+    body: `Rozszerzenie .man – tworzy profil obowiązkowy użytkownika w Active Directory.`,
+    tags: ["active-directory","windows","egzamin-teoretyczny"]
+  },
+  {
+    title: "ipconfig /release i /renew",
+    body: `ipconfig /release – wyłącza DHCP (zwalnia adres IP).
+ipconfig /renew – włącza DHCP (odnawia adres IP).`,
+    tags: ["komenda-windows","sieć","protokół","egzamin-praktyczny"]
+  },
+  {
+    title: "Typy połączeń sieciowych",
+    body: `Broadcast – wysyła pakiet do każdego w sieci
+Unicast – jeden do jednego
+Anycast – wybiera najbliższy serwer
+Multicast – broadcast do wybranych (grup)`,
+    tags: ["sieć","adresacja-IP","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Programy sieciowe Linux",
+    body: `Konqueror – eksplorator plików online (KDE)
+Wireshark – analizuje ruch sieciowy
+Tracker – wyszukiwarka w Linux GNOME`,
+    tags: ["linux","oprogramowanie","sieć","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "Analizator protokołów",
+    body: `Analizator protokołów (np. Wireshark) – program do testów trasy sieci i analizy pakietów.`,
+    tags: ["sieć","diagnostyka","oprogramowanie","egzamin-teoretyczny","egzamin-praktyczny"]
+  },
+  {
+    title: "Licencje – MOLP, OEM, CSP",
+    body: `MOLP – licencja grupowa, wiele licencji sprzedawanych naraz (organizacje).
+OEM – licencja dla jednego użytkownika, przypisana do jednego komputera.
+Microsoft CSP – licencja na Office i inne produkty Microsoft (subskrypcja).`,
+    tags: ["licencje","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Uprawnienia Windows – deny",
+    body: `Uprawnienia Windows: deny (odmów) zawsze ma priorytet nad allow (zezwól).`,
+    tags: ["windows","bezpieczeństwo","active-directory","egzamin-teoretyczny"]
+  },
+  {
+    title: "Technologie dostępowe",
+    body: `GPRS – przesyła dane na GSM
+HFC – światłowód + koncentryk
+xDSL – przesyła dane po telefonii miedzianej
+PLC – przesyła dane po sieci elektrycznej
+PoE – prąd po RJ45
+ADSL – internet po kablu telefonicznym`,
+    tags: ["sieć","transmisja","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Warstwy ISO OSI",
+    body: `7 – Aplikacji:    DNS, FTP, HTTP, IMAP, SSH
+6 – Prezentacji:  Szyfrowanie, formaty
+5 – Sesji:        Sesje
+4 – Transportowa: TCP, UDP
+3 – Sieciowa:     IPv4, IPv6, Routing
+2 – Łącza danych: VLAN, WiFi, ARP, Switch, MAC
+1 – Fizyczna:     Fale radiowe, karta sieciowa, kabel`,
+    tags: ["sieć","ISO-OSI","protokół","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "RAID – poziomy",
+    body: `RAID 0 – rozdzielanie (striping): Dysk A + Dysk B = jeden dysk logiczny, brak redundancji.
+RAID 1 – lustrzana kopia: Dysk A (dane) + Dysk B (kopia).
+RAID 5 – parzystość rozłożona: min. 3 dyski, można odtworzyć po awarii jednego.
+RAID 10 – RAID 1+0: 4 dyski, dane + mirror, wszystkie razem jako jeden dysk.`,
+    tags: ["hardware","dyski","serwery","backup","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Auto MDI/MDIX",
+    body: `Auto MDI/MDIX – dzięki temu systemowi nie trzeba już używać kabla krosowego (switch automatycznie dopasowuje sygnał).`,
+    tags: ["sieć","okablowanie","hardware","egzamin-teoretyczny"]
+  },
+  {
+    title: "Standardy IEEE",
+    body: `802.3 – Ethernet (RJ45)
+802.11 – WiFi
+802.15 – Bluetooth
+1394 – FireWire
+802.1Q – VLAN
+802.3af – PoE`,
+    tags: ["sieć","IEEE","standardy","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Domeny rozgłoszeniowe i kolizyjne",
+    body: `Domeny rozgłoszeniowe – tworzone przez routery i switche.
+Domeny kolizyjne – tworzone przez komputery i serwery.`,
+    tags: ["sieć","hardware","egzamin-teoretyczny"]
+  },
+  {
+    title: "HDMI – wersje",
+    body: `HDMI 1.4 (High Speed) – 1080p do 240 Hz, 10 Gb/s
+HDMI 2.0 (Premium High Speed) – 4K do 60 Hz, 18 Gb/s
+HDMI 2.1 (Ultra High Speed) – 8K do 60 Hz, 48 Gb/s`,
+    tags: ["hardware","interfejsy","rozdzielczości","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "DisplayPort – wersje",
+    body: `DP 1.1 – 8 Gb/s
+DP 1.2 – 17 Gb/s, 4K 60 Hz
+DP 1.4 – 32 Gb/s, 4K 144 Hz
+DP 2.0 – 80 Gb/s, 16K`,
+    tags: ["hardware","interfejsy","rozdzielczości","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "DVI – warianty",
+    body: `DVI-I – analogowy + cyfrowy
+DVI-D – tylko cyfrowy
+DVI-A – tylko analogowy
+DVI Single Link – 4 Gb/s
+DVI Dual Link – 7 Gb/s`,
+    tags: ["hardware","interfejsy","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "USB – wersje",
+    body: `USB 1.0 – 12 Mb/s
+USB 2.0 – 480 Mb/s
+USB 3.0 – 5 Gb/s
+USB 3.1 Gen2 – 10 Gb/s
+USB 3.2 – 20 Gb/s
+USB 4.0 – 40 Gb/s`,
+    tags: ["hardware","interfejsy","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Thunderbolt – wersje",
+    body: `Thunderbolt 1 – 10 Gb/s
+Thunderbolt 2 – 20 Gb/s
+Thunderbolt 3/4 – 40 Gb/s`,
+    tags: ["hardware","interfejsy","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "FireWire – wersje",
+    body: `FireWire 400 – 400 Mb/s
+FireWire 800 – 800 Mb/s`,
+    tags: ["hardware","interfejsy","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "Serwer Apache Linux – konfiguracja",
+    body: `Zmiana portu:
+  /etc/apache2/ports.conf → Listen [nowy_port]
+  /etc/apache2/sites-available/000-default.conf → dodaj port na górze
+
+Zmiana folderu strony:
+  sites-available/000-default.conf → zmień DocumentRoot
+  /etc/apache2/apache2.conf → zmień ścieżkę
+
+Użytkownik i grupa Apache: www-data
+Pliki muszą mieć właściciela/uprawnienia dla www-data
+
+Włączanie/wyłączanie strony:
+  sudo a2dissite plik.conf
+  sudo a2ensite plik.conf`,
+    tags: ["linux","serwery","www","konfiguracja","egzamin-praktyczny"],
+    rich: true
+  },
+  {
+    title: "Serwer FTP Linux – konfiguracja",
+    body: `Konfiguracja: /etc/vsftpd.conf (lub xxftpd.conf)
+Chroot – pozwala na wejście tylko do udostępnianych folderów
+Aby zezwolić na zapis z częściową blokadą:
+  allow_writeable_chroot=YES`,
+    tags: ["linux","serwery","FTP","konfiguracja","egzamin-praktyczny"],
+    rich: true
+  },
+  {
+    title: "smbpasswd -a",
+    body: `smbpasswd -a nazwauzytkownika – tworzy użytkownika Samby (współdzielenie plików Linux ↔ Windows).`,
+    tags: ["komenda-linux","linux","sieć","egzamin-praktyczny"]
+  },
+  {
+    title: "uname -a",
+    body: `uname -a – komenda Linux wyświetlająca informacje o systemie operacyjnym (kernel, architektura itp.).`,
+    tags: ["komenda-linux","system-operacyjny","egzamin-praktyczny"]
+  },
+  {
+    title: "/etc/os-release",
+    body: `/etc/os-release – plik zawierający datę wydania i informacje o dystrybucji Linux.`,
+    tags: ["linux","system-operacyjny","egzamin-praktyczny"]
+  },
+  {
+    title: "DHCP Linux – konfiguracja",
+    body: `sudo nano /etc/default/isc-dhcp-server – modyfikacja pliku konfiguracyjnego serwera DHCP.`,
+    tags: ["linux","sieć","serwery","konfiguracja","protokół","egzamin-praktyczny"]
+  },
+  {
+    title: "net share (Windows)",
+    body: `net share NASZ_EGZAMIN=C:\\WSPÓLNY /users:10 /remark:"Materiały"
+→ udostępnia folder dla 10 użytkowników w sieci.`,
+    tags: ["komenda-windows","sieć","windows","egzamin-praktyczny"]
+  },
+  {
+    title: "Włączanie/wyłączanie interfejsu sieciowego",
+    body: `Wyłączenie: sudo ip link set [nazwa_interfejsu] down
+Włączenie:  sudo ip link set [nazwa_interfejsu] up`,
+    tags: ["komenda-linux","sieć","egzamin-praktyczny"]
+  },
+  {
+    title: "free -h",
+    body: `free -h --si – sprawdza wolną i zajętą pamięć RAM.`,
+    tags: ["komenda-linux","pamięć","diagnostyka","egzamin-praktyczny"]
+  },
+  {
+    title: "PCI i PCIe – przepustowości",
+    body: `PCI – 133 MB/s
+PCIe 1 – 250 MB/s
+PCIe 2 – 500 MB/s
+PCIe 3 – 1 GB/s
+PCIe 4 – 2 GB/s
+PCIe 5 – 4 GB/s`,
+    tags: ["hardware","interfejsy","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "DDR – wersje",
+    body: `DDR1/2 – < 1066 MHz | > 1,5 V
+DDR3 – 1066–2133 MHz | 1,5 V
+DDR3L – 1066–2133 MHz | 1,35 V (low voltage)
+DDR4 – 2133–3200+ MHz | 1,2 V
+DDR5 – 4800+ MHz | 1,1 V`,
+    tags: ["hardware","pamięć","przepustowości","egzamin-teoretyczny"],
+    rich: true
+  },
+  {
+    title: "RSTP / STP",
+    body: `RSTP – redundancja switchy (szybsza wersja STP).
+STP – słabsza redundancja switchy.`,
+    tags: ["sieć","hardware","protokół","egzamin-teoretyczny"]
+  },
+  {
+    title: "Element nadający się do recyklingu",
+    body: `Elementy elektroniczne oznaczone symbolem przekreślonego kosza są przeznaczone do recyklingu (dyrektywa WEEE).`,
+    tags: ["BHP","normy","egzamin-teoretyczny"]
+  },
+  {
+    title: "Test antywirusowy",
+    body: `Test antywirusowy należy przeprowadzać regularnie (zalecane przez politykę bezpieczeństwa).`,
+    tags: ["bezpieczeństwo","windows","egzamin-teoretyczny"]
+  },
+  {
+    title: "CU – zarządza",
+    body: `CU (Control Unit) – jednostka sterująca procesora, zarządza kolejnością wykonywania instrukcji.`,
+    tags: ["hardware","CPU","egzamin-teoretyczny"]
+  }
+];
+
+// === TAG GROUPS CONFIG ===
+const TAG_GROUPS = [
+  { label: "Egzamin", tags: ["egzamin-teoretyczny","egzamin-praktyczny"] },
+  { label: "Komendy", tags: ["komenda-linux","komenda-windows"] },
+  { label: "Sieć", tags: ["sieć","protokół","WiFi","VPN","ISO-OSI","adresacja-IP","DNS","IEEE","standardy","topologia","LAN","bezprzewodowe","VoIP","transmisja"] },
+  { label: "Hardware", tags: ["hardware","CPU","pamięć","dyski","karta-graficzna","interfejsy","przepustowości","rozdzielczości","okablowanie","światłowód","zasilanie","audio","drukarki","skanery"] },
+  { label: "System", tags: ["linux","windows","system-operacyjny","system-plików","active-directory","rejestr","użytkownicy","konfiguracja","serwery","www","FTP","backup"] },
+  { label: "Inne", tags: ["normy","licencje","bezpieczeństwo","BHP","diagnostyka","narzędzia","oprogramowanie","historia","poczta"] },
+];
+
+// Flatten for autocomplete
+const allTags = [...new Set(NOTES.flatMap(n => n.tags))].sort();
+
+// === BUILD TAG GROUPS ===
+const tagsGroupsEl = document.getElementById('tagsGroups');
+
+// Clear button row
+const clearRow = document.createElement('div');
+clearRow.className = 'tag-group';
+const clearLabel = document.createElement('span');
+clearLabel.className = 'tag-group-label';
+clearLabel.textContent = '';
+const clearBtn = document.createElement('span');
+clearBtn.className = 'tag-filter clear-btn';
+clearBtn.dataset.tag = '__clear__';
+clearBtn.textContent = '✕ wyczyść filtry';
+clearRow.appendChild(clearLabel);
+clearRow.appendChild(clearBtn);
+tagsGroupsEl.appendChild(clearRow);
+
+TAG_GROUPS.forEach(group => {
+  const existing = group.tags.filter(t => allTags.includes(t));
+  if (!existing.length) return;
+  const row = document.createElement('div');
+  row.className = 'tag-group';
+  const label = document.createElement('span');
+  label.className = 'tag-group-label';
+  label.textContent = group.label;
+  row.appendChild(label);
+  existing.forEach(tag => {
+    const btn = document.createElement('span');
+    btn.className = 'tag-filter';
+    btn.dataset.tag = tag;
+    btn.textContent = tag;
+    row.appendChild(btn);
+  });
+  tagsGroupsEl.appendChild(row);
+});
+
+// === BUILD NOTE CARDS ===
+const grid = document.getElementById('notesGrid');
+const noResults = document.getElementById('noResults');
+
+function buildCard(note) {
+  const card = document.createElement('div');
+  card.className = 'note-card' + (note.rich ? ' rich' : '');
+  card.dataset.tags = note.tags.join(' ');
+  card.dataset.search = (note.title + ' ' + note.body + ' ' + note.tags.join(' ')).toLowerCase();
+
+  const title = document.createElement('div');
+  title.className = 'note-title';
+  title.textContent = note.title;
+  if (note.rich) {
+    const badge = document.createElement('span');
+    badge.className = 'rich-badge';
+    badge.textContent = 'LISTA';
+    title.appendChild(badge);
+  }
+
+  const body = document.createElement('div');
+  body.className = 'note-body';
+  body.textContent = note.body;
+
+  const tagRow = document.createElement('div');
+  tagRow.className = 'note-tags';
+  note.tags.forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'note-tag';
+    span.dataset.tag = t;
+    span.textContent = t;
+    span.addEventListener('click', () => activateTag(t));
+    tagRow.appendChild(span);
+  });
+
+  card.appendChild(title);
+  card.appendChild(body);
+  card.appendChild(tagRow);
+  return card;
+}
+
+const cards = NOTES.map(note => {
+  const card = buildCard(note);
+  grid.insertBefore(card, noResults);
+  return { card, note };
+});
+
+// === STATE ===
+let activeTag = null;
+let searchQuery = '';
+
+function activateTag(tag) {
+  activeTag = (activeTag === tag) ? null : tag;
+  document.querySelectorAll('.tag-filter').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tag === activeTag);
+  });
+  applyFilters();
+  hideAutocomplete();
+  document.getElementById('searchInput').value = '';
+  searchQuery = '';
+}
+
+function applyFilters() {
+  const q = searchQuery.trim().toLowerCase();
+  let visible = 0;
+  cards.forEach(({ card, note }) => {
+    const matchTag = !activeTag || note.tags.includes(activeTag);
+    const matchSearch = !q || card.dataset.search.includes(q);
+    if (matchTag && matchSearch) {
+      card.classList.remove('hidden');
+      visible++;
+      highlightCard(card, note, q);
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  noResults.style.display = visible === 0 ? 'block' : 'none';
+  const info = document.getElementById('resultsInfo');
+  const total = cards.length;
+  if (q || activeTag) {
+    info.textContent = `Pokazuję ${visible} z ${total} notatek${activeTag ? ' · filtr: ' + activeTag : ''}`;
+  } else {
+    info.textContent = `${total} notatek łącznie`;
+  }
+}
+
+function highlightCard(card, note, q) {
+  const titleEl = card.querySelector('.note-title');
+  const bodyEl = card.querySelector('.note-body');
+  if (!q) {
+    // Restore (with badge if rich)
+    titleEl.textContent = note.title;
+    if (note.rich) {
+      const badge = document.createElement('span');
+      badge.className = 'rich-badge';
+      badge.textContent = 'LISTA';
+      titleEl.appendChild(badge);
+    }
+    bodyEl.textContent = note.body;
+    return;
+  }
+  const hl = s => highlight(escapeHtml(s), q);
+  titleEl.innerHTML = hl(note.title) + (note.rich ? '<span class="rich-badge">LISTA</span>' : '');
+  bodyEl.innerHTML = hl(note.body);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(esc, 'gi'), m => `<mark>${m}</mark>`);
+}
+
+// === AUTOCOMPLETE ===
+const acEl = document.getElementById('autocomplete');
+let acFocused = -1;
+let acItems = [];
+
+function showAutocomplete(q) {
+  if (!q || q.length < 1) { hideAutocomplete(); return; }
+  const ql = q.toLowerCase();
+  // Match tags
+  const matchedTags = allTags.filter(t => t.toLowerCase().includes(ql));
+  // Match note titles
+  const matchedNotes = NOTES.filter(n => n.title.toLowerCase().includes(ql)).slice(0, 3);
+
+  acItems = [];
+  const items = [];
+
+  matchedTags.slice(0, 6).forEach(tag => {
+    const count = NOTES.filter(n => n.tags.includes(tag)).length;
+    acItems.push({ type: 'tag', value: tag });
+    items.push({ type: 'tag', value: tag, count });
+  });
+
+  if (items.length === 0) {
+    hideAutocomplete(); return;
+  }
+
+  acEl.innerHTML = '';
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'ac-item';
+    div.dataset.idx = i;
+    const badge = document.createElement('span');
+    badge.className = 'ac-badge';
+    badge.textContent = item.type === 'tag' ? `tag · ${item.count}` : 'notatka';
+    const label = document.createElement('span');
+    label.innerHTML = highlight(escapeHtml(item.value), ql);
+    div.appendChild(badge);
+    div.appendChild(label);
+    div.addEventListener('mousedown', e => {
+      e.preventDefault();
+      if (item.type === 'tag') activateTag(item.value);
+    });
+    acEl.appendChild(div);
+  });
+  acFocused = -1;
+  acEl.style.display = 'block';
+}
+
+function hideAutocomplete() {
+  acEl.style.display = 'none';
+  acFocused = -1;
+}
+
+function moveFocus(dir) {
+  const items = acEl.querySelectorAll('.ac-item');
+  if (!items.length) return;
+  items[acFocused]?.classList.remove('focused');
+  acFocused = Math.max(-1, Math.min(items.length - 1, acFocused + dir));
+  items[acFocused]?.classList.add('focused');
+}
+
+// === EVENT LISTENERS ===
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input', e => {
+  searchQuery = e.target.value;
+  applyFilters();
+  showAutocomplete(searchQuery);
+});
+
+searchInput.addEventListener('keydown', e => {
+  if (acEl.style.display === 'block') {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveFocus(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveFocus(-1); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      const focused = acEl.querySelector('.ac-item.focused');
+      if (focused) focused.dispatchEvent(new Event('mousedown'));
+      else hideAutocomplete();
+    }
+    else if (e.key === 'Escape') hideAutocomplete();
+  }
+});
+
+searchInput.addEventListener('blur', () => setTimeout(hideAutocomplete, 150));
+searchInput.addEventListener('focus', () => { if (searchQuery) showAutocomplete(searchQuery); });
+
+tagsGroupsEl.addEventListener('click', e => {
+  const btn = e.target.closest('.tag-filter');
+  if (!btn) return;
+  if (btn.dataset.tag === '__clear__') {
+    activeTag = null;
+    document.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active'));
+    applyFilters();
+    return;
+  }
+  activateTag(btn.dataset.tag);
+});
+
+// === INIT ===
+applyFilters();
+</script>
+</body>
+</html>
