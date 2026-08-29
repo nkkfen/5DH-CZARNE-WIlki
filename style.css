@@ -21,9 +21,9 @@ html {
 body {
   background-color: var(--black);
   background-image: url("assets/las-tlo.png");
-  background-repeat: repeat-x;
+  background-repeat: none;
   background-position: bottom center;
-  background-size: 900px auto;
+  background-size: 900px;
   background-attachment: fixed;
   color: var(--white);
   font-family: 'Inter', sans-serif;
