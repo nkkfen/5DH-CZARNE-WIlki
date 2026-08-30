@@ -1,0 +1,260 @@
+@font-face {
+  font-family: 'ChocolateCipher';
+  src: url('../assets/fonts/ChocolateCipher.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* ---------- Pasek gry (górny) ---------- */
+.game-topbar {
+  background: var(--gray-dark);
+  border-bottom: 2px solid var(--red);
+}
+
+.game-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.game-count {
+  display: block;
+  color: var(--red-bright);
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  margin-bottom: 2px;
+}
+
+.game-name {
+  font-size: 1.4rem;
+  color: var(--white);
+}
+
+.game-timer {
+  text-align: right;
+}
+
+.timer-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-label {
+  color: var(--gray-text);
+  font-size: 0.72rem;
+  margin-top: 4px;
+  max-width: 220px;
+}
+
+@media (max-width: 640px) {
+  .game-topbar-inner { justify-content: center; text-align: center; }
+  .game-timer { text-align: center; }
+  .timer-label { margin-left: auto; margin-right: auto; }
+}
+
+/* ---------- Kontener gry ---------- */
+.game-container {
+  padding: 48px 24px;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Placeholder testowy minigry ---------- */
+.game-placeholder {
+  text-align: center;
+  max-width: 480px;
+  background: var(--gray-dark);
+  border: 1px solid var(--gray-line);
+  border-radius: 6px;
+  padding: 40px 28px;
+}
+
+.placeholder-title {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.placeholder-note {
+  color: var(--gray-text);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+
+.placeholder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ---------- Przycisk drugorzędny (obrys) ---------- */
+.btn-secondary {
+  display: inline-block;
+  background: transparent;
+  color: var(--white);
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+  padding: 13px 32px;
+  border-radius: 3px;
+  border: 1px solid var(--gray-line);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--red-bright);
+  color: var(--red-bright);
+}
+
+/* ---------- Ekran podsumowania ---------- */
+.summary-card {
+  text-align: center;
+  max-width: 520px;
+  background: var(--gray-dark);
+  border: 1px solid var(--gray-line);
+  border-top: 3px solid var(--red-bright);
+  border-radius: 6px;
+  padding: 44px 32px;
+}
+
+.summary-heading {
+  font-size: 1.3rem;
+  margin-bottom: 18px;
+}
+
+.summary-score {
+  color: var(--red-bright);
+  font-size: 1.6rem;
+}
+
+.summary-lorem {
+  color: var(--gray-text);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--gray-text);
+  margin-bottom: 10px;
+}
+
+.summary-input {
+  width: 100%;
+  max-width: 320px;
+  background: var(--black);
+  border: 1px solid var(--gray-line);
+  color: var(--white);
+  padding: 12px 14px;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.summary-input:focus {
+  outline: none;
+  border-color: var(--red-bright);
+}
+
+.summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.summary-note {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--red-bright);
+  min-height: 1.2em;
+}
+
+.summary-note.error {
+  color: var(--red-bright);
+}
+
+/* ---------- Minigra 1: Deszyfrowanie czekoladki ---------- */
+.cipher-game {
+  text-align: center;
+  max-width: 680px;
+  width: 100%;
+}
+
+.cipher-rules-img {
+  max-width: 100%;
+  width: 620px;
+  height: auto;
+  display: block;
+  margin: 0 auto 24px;
+}
+
+.cipher-instructions {
+  color: var(--gray-text);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+
+.cipher-word {
+  font-family: 'ChocolateCipher', sans-serif;
+  color: var(--red-bright);
+  font-size: 3.2rem;
+  letter-spacing: 0.35em;
+  line-height: 1;
+  margin-bottom: 32px;
+  word-break: break-all;
+}
+
+.cipher-input {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 18px;
+  background: var(--gray-dark);
+  border: 1px solid var(--gray-line);
+  color: var(--white);
+  padding: 12px 14px;
+  border-radius: 3px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.cipher-input:focus {
+  outline: none;
+  border-color: var(--red-bright);
+}
+
+.cipher-feedback {
+  margin-top: 18px;
+  font-size: 0.9rem;
+  min-height: 1.3em;
+  font-weight: 600;
+}
+
+.cipher-feedback.ok {
+  color: #6fbf73;
+}
+
+.cipher-feedback.bad {
+  color: var(--red-bright);
+}
+
+@media (max-width: 640px) {
+  .cipher-word { font-size: 2.1rem; letter-spacing: 0.22em; }
+  .cipher-rules-img { width: 100%; }
+}
