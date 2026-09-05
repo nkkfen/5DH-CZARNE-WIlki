@@ -9,7 +9,7 @@ const leaderboard = [
   { name: "Mlody_Wojtek", score: 705 },
   { name: "Rysiu",        score: 555 },
   { name: "Ola Traper",   score: 500 },
-  { name: "Grzybek",      score: 470 },
+  { name: "Grzybek",      score: 472 },
 ];
 
 // wczytuje wyniki zapisane przez graczy w minigrach (localStorage) i łączy
