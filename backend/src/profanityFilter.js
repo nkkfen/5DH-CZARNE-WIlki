@@ -74,6 +74,15 @@ const FORBIDDEN_STEMS = [
   "dziwk",
   "kutas",
   "suka",
+  "hitler",
+  "ejakulat",
+  "epstein",
+  "blyat",
+  "naplet",
+  "pała",
+  "szon",
+  "cuck",
+  "kurewka",
   // angielskie
   "fuck",
   "shit",
@@ -87,6 +96,8 @@ const FORBIDDEN_STEMS = [
   "whore",
   "slut",
   "retard",
+  "dick",
+  "dih",
 ];
 
 function normalize(text) {
