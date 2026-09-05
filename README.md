@@ -1,1 +1,0 @@
-strona na nabór wilkowy
