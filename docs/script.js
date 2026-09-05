@@ -4,15 +4,12 @@
  * poniższą listę (albo docelowo wczytuj z data/leaderboard.json przez fetch()).
  */
 const leaderboard = [
-  { name: "Wilczek99",    score: 980 },
-  { name: "Sokolica",     score: 915 },
-  { name: "Zuch_Adam",    score: 870 },
+  { name: "Wilczek99",    score: 824 },
   { name: "Kasia_H",      score: 760 },
   { name: "Mlody_Wojtek", score: 705 },
   { name: "Puszczyk",     score: 660 },
-  { name: "Iskra",        score: 610 },
-  { name: "Rysiu",        score: 555 },
-  { name: "Ola_Traper",   score: 500 },
+  { name: "Rysiu_S",      score: 555 },
+  { name: "Alcest",       score: 500 },
   { name: "Grzybek",      score: 470 },
 ];
 
