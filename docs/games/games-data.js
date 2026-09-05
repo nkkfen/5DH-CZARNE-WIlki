@@ -118,10 +118,10 @@ const archeryGame = {
   name: "Strzał z łuku",
   render(container, api) {
     const VIEW_W = 400;
-    const VIEW_H = 520;
-    const PIVOT = { x: 200, y: 470 };
-    const MAX_DRAW = 90;
-    const MAX_ANGLE = 42;
+    const VIEW_H = 600;
+    const PIVOT = { x: 200, y: 460 };
+    const MAX_DRAW = 110;
+    const MAX_ANGLE = 19.6;
     const MIN_POWER_TO_FIRE = 0.4;
     const TARGET_Y = 95;
     const TRACK_MIN = 70;
@@ -129,6 +129,7 @@ const archeryGame = {
     const OUTER_R = 34;
     const BULLSEYE_R = 11;
     const TOTAL_ARROWS = 3;
+    const TARGET_SPEED = 0.55;
 
     let arrowsUsed = 0;
     let finished = false;
@@ -137,28 +138,38 @@ const archeryGame = {
     let power = 0;
     let angleDeg = 0;
     let targetX = 200;
-    let targetStartTime = null;
+    let targetFrozen = false;
+    let elapsedTotal = 0;
+    let lastFrameTime = null;
 
     container.innerHTML = `
       <div class="archery-game">
-        <p class="archery-instructions">Przeciągnij łuk w dół, aby go naciągnąć i wycelować w bok, a puść, gdy naciąg jest maksymalny (poniżej 40% naciągu pozycja się zresetuje). Trafiaj w czerwony środek poruszającej się tarczy!</p>
-        <div class="archery-counter" id="archery-counter">Strzał 1/${TOTAL_ARROWS}</div>
-        <svg id="archery-svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" class="archery-svg" style="touch-action:none;">
-          <g id="target-group">
-            <circle cx="200" cy="${TARGET_Y}" r="${OUTER_R}" fill="#cfcfcf" stroke="#3d3d3d" stroke-width="2"></circle>
-            <circle cx="200" cy="${TARGET_Y}" r="${OUTER_R * 0.6}" fill="#9a9a9a"></circle>
-            <circle cx="200" cy="${TARGET_Y}" r="${BULLSEYE_R}" fill="#e2352f"></circle>
-          </g>
-          <g id="flying-layer"></g>
-          <g id="bow-group" transform="rotate(0 ${PIVOT.x} ${PIVOT.y})">
-            <path d="M140,${PIVOT.y} Q200,${PIVOT.y - 60} 260,${PIVOT.y}" fill="none" stroke="#8a5a2b" stroke-width="6" stroke-linecap="round"></path>
-            <line id="string-left" x1="140" y1="${PIVOT.y}" x2="200" y2="${PIVOT.y}" stroke="#e8e0d0" stroke-width="2"></line>
-            <line id="string-right" x1="260" y1="${PIVOT.y}" x2="200" y2="${PIVOT.y}" stroke="#e8e0d0" stroke-width="2"></line>
-            <line id="arrow-shaft" x1="200" y1="${PIVOT.y - 90}" x2="200" y2="${PIVOT.y}" stroke="#e2352f" stroke-width="3"></line>
-            <polygon id="arrow-head" points="200,${PIVOT.y - 98} 194,${PIVOT.y - 86} 206,${PIVOT.y - 86}" fill="#e2352f"></polygon>
-          </g>
-        </svg>
-        <p class="archery-feedback" id="archery-feedback"></p>
+        <div class="archery-board">
+          <svg id="archery-svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}" class="archery-svg" style="touch-action:none;">
+            <g id="target-group">
+              <circle cx="200" cy="${TARGET_Y}" r="${OUTER_R}" fill="#cfcfcf" stroke="#3d3d3d" stroke-width="2"></circle>
+              <circle cx="200" cy="${TARGET_Y}" r="${OUTER_R * 0.6}" fill="#9a9a9a"></circle>
+              <circle cx="200" cy="${TARGET_Y}" r="${BULLSEYE_R}" fill="#e2352f"></circle>
+            </g>
+            <g id="flying-layer"></g>
+            <g id="bow-group" transform="rotate(0 ${PIVOT.x} ${PIVOT.y})">
+              <path d="M110,${PIVOT.y} Q200,${PIVOT.y - 95} 290,${PIVOT.y}" fill="none" stroke="#8a5a2b" stroke-width="9" stroke-linecap="round"></path>
+              <line id="string-left" x1="110" y1="${PIVOT.y}" x2="200" y2="${PIVOT.y}" stroke="#e8e0d0" stroke-width="3"></line>
+              <line id="string-right" x1="290" y1="${PIVOT.y}" x2="200" y2="${PIVOT.y}" stroke="#e8e0d0" stroke-width="3"></line>
+              <g id="arrow-visual">
+                <line id="arrow-shaft" x1="200" y1="${PIVOT.y - 110}" x2="200" y2="${PIVOT.y}" stroke="#e2352f" stroke-width="4"></line>
+                <polygon id="arrow-head" points="200,${PIVOT.y - 122} 191,${PIVOT.y - 106} 209,${PIVOT.y - 106}" fill="#e2352f"></polygon>
+              </g>
+            </g>
+          </svg>
+
+          <div class="archery-overlay-top">
+            <p class="archery-instructions">Przeciągnij łuk w dół, aby go naciągnąć i wycelować w ruchomą tarczę. Traf w sam jej środek a przejdziesz minigrę!</p>
+            <div class="archery-counter" id="archery-counter">Strzał 1/${TOTAL_ARROWS}</div>
+          </div>
+
+          <p class="archery-feedback-overlay" id="archery-feedback"></p>
+        </div>
       </div>
     `;
 
@@ -167,6 +178,7 @@ const archeryGame = {
     const stringLeft = container.querySelector("#string-left");
     const stringRight = container.querySelector("#string-right");
     const arrowShaft = container.querySelector("#arrow-shaft");
+    const arrowVisual = container.querySelector("#arrow-visual");
     const targetGroup = container.querySelector("#target-group");
     const flyingLayer = container.querySelector("#flying-layer");
     const counterEl = container.querySelector("#archery-counter");
@@ -193,7 +205,8 @@ const archeryGame = {
       const dx = p.x - PIVOT.x;
       const dy = p.y - PIVOT.y;
       power = Math.max(0, Math.min(1, dy / MAX_DRAW));
-      angleDeg = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, dx * 0.6));
+      // ujemny znak = odwrócony kierunek obracania względem przeciągnięcia
+      angleDeg = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, -dx * 0.25));
       renderBowState();
     }
 
@@ -233,33 +246,47 @@ const archeryGame = {
         animateResetBow();
         return;
       }
-      fireArrow(angleDeg, power);
+      fireArrow(angleDeg);
     }
 
     svgEl.addEventListener("pointerdown", onPointerDown);
 
     function animateTarget(now) {
       if (finished) return;
-      if (targetStartTime === null) targetStartTime = now;
-      const elapsed = (now - targetStartTime) / 1000;
-      targetX = 200 + 130 * Math.sin(elapsed * 1.1);
-      targetGroup.querySelectorAll("circle").forEach((c) => c.setAttribute("cx", targetX));
+      if (lastFrameTime === null) lastFrameTime = now;
+      const dt = (now - lastFrameTime) / 1000;
+      lastFrameTime = now;
+
+      // tarcza zamraża się na czas lotu strzały, żeby to co widać
+      // pokrywało się dokładnie z tym, co jest oceniane jako trafienie
+      if (!targetFrozen) {
+        elapsedTotal += dt;
+        targetX = 200 + 130 * Math.sin(elapsedTotal * TARGET_SPEED);
+        targetGroup.querySelectorAll("circle").forEach((c) => c.setAttribute("cx", targetX));
+      }
       requestAnimationFrame(animateTarget);
     }
     requestAnimationFrame(animateTarget);
 
-    function fireArrow(angle, firePower) {
+    function fireArrow(angle) {
       busy = true;
+      targetFrozen = true;
       arrowsUsed += 1;
       counterEl.textContent = `Strzał ${Math.min(arrowsUsed, TOTAL_ARROWS)}/${TOTAL_ARROWS}`;
 
       const frozenTargetX = targetX;
       const rad = (angle * Math.PI) / 180;
-      const startX = PIVOT.x + 90 * Math.sin(rad);
-      const startY = PIVOT.y - 90 * Math.cos(rad);
+      const startX = PIVOT.x + 110 * Math.sin(rad);
+      const startY = PIVOT.y - 110 * Math.cos(rad);
 
-      const t = (angle + MAX_ANGLE) / (MAX_ANGLE * 2);
-      const landingX = TRACK_MIN + t * (TRACK_MAX - TRACK_MIN);
+      // strzała leci po linii dokładnie wzdłuż kąta, w który wycelowany
+      // jest łuk (prosta rzutowana od punktu obrotu przez grot, aż do
+      // wysokości tarczy) - a nie po niezależnie wyliczonej trasie
+      const landingX = PIVOT.x + (PIVOT.y - TARGET_Y) * Math.tan(rad);
+
+      // ukryj strzałę spoczywającą na cięciwie - od teraz reprezentuje ją
+      // osobny, latający element, żeby nie było wizualnego "skoku"
+      arrowVisual.style.opacity = "0";
 
       const flying = document.createElementNS("http://www.w3.org/2000/svg", "line");
       flying.setAttribute("x1", startX);
@@ -267,12 +294,9 @@ const archeryGame = {
       flying.setAttribute("x2", startX);
       flying.setAttribute("y2", startY);
       flying.setAttribute("stroke", "#e2352f");
-      flying.setAttribute("stroke-width", "3");
+      flying.setAttribute("stroke-width", "4");
+      flying.setAttribute("stroke-linecap", "round");
       flyingLayer.appendChild(flying);
-
-      power = 0;
-      angleDeg = 0;
-      renderBowState();
 
       const duration = 380;
       const t0 = performance.now();
@@ -282,12 +306,17 @@ const archeryGame = {
         const curY = startY + (TARGET_Y - startY) * p;
         flying.setAttribute("x2", curX);
         flying.setAttribute("y2", curY);
-        flying.setAttribute("x1", curX - (curX - startX) * 0.25);
-        flying.setAttribute("y1", curY - (curY - startY) * 0.25);
+        flying.setAttribute("x1", startX + (curX - startX) * Math.max(0, p - 0.15));
+        flying.setAttribute("y1", startY + (curY - startY) * Math.max(0, p - 0.15));
         if (p < 1) {
           requestAnimationFrame(step);
         } else {
           flyingLayer.removeChild(flying);
+          // dopiero teraz łuk wraca do pozycji neutralnej
+          power = 0;
+          angleDeg = 0;
+          renderBowState();
+          arrowVisual.style.opacity = "1";
           evaluateShot(landingX, frozenTargetX);
         }
       }
@@ -297,7 +326,7 @@ const archeryGame = {
     function endGameSkipped() {
       finished = true;
       feedbackEl.textContent = "Strzały się skończyły! Ta minigra zostaje pominięta, ale i tak zaliczamy Ci 50 punktów - powodzenia w następnej!";
-      feedbackEl.className = "archery-feedback bad";
+      feedbackEl.className = "archery-feedback-overlay bad";
       setTimeout(() => api.completeGame(50), 2000);
     }
 
@@ -307,7 +336,7 @@ const archeryGame = {
       if (dist <= BULLSEYE_R) {
         finished = true;
         feedbackEl.textContent = "Prosto w środek! Świetny strzał! Przechodzimy do kolejnej minigry...";
-        feedbackEl.className = "archery-feedback ok";
+        feedbackEl.className = "archery-feedback-overlay ok";
         setTimeout(() => api.completeGame(), 1200);
         return;
       }
@@ -319,12 +348,13 @@ const archeryGame = {
         api.registerError();
         feedbackEl.textContent = "Pudło! Strzała nie trafiła w tarczę.";
       }
-      feedbackEl.className = "archery-feedback bad";
+      feedbackEl.className = "archery-feedback-overlay bad";
 
       if (arrowsUsed >= TOTAL_ARROWS) {
         endGameSkipped();
       } else {
         busy = false;
+        targetFrozen = false;
       }
     }
   },
@@ -338,15 +368,13 @@ const archeryGame = {
  * - trafienie w promień tolerancji danego miejsca: sukces, przejście dalej
  * - pudło: -20 pkt (api.registerError()), gracz ma 3 próby
  * - po wykorzystaniu 3 prób bez trafienia: automatyczne zaliczenie na 50 pkt
- *
- * UWAGA: współrzędne "Rynek i Ratusz" są przybliżone (na podstawie opisu
- * lokalizacji, nie dokładnego pomiaru) - przed publikacją warto je
- * zweryfikować na prawdziwej mapie i ewentualnie dodać kolejne miejsca.
  */
 const OLAWA_PLACES = [
-  { name: "Zamek Piastowski (Pałac Luizy)", lat: 50.94417, lng: 17.29444, radius: 120 },
-  { name: "Rynek i Ratusz", lat: 50.9435, lng: 17.2915, radius: 150 },
   { name: "Dworzec PKP Oława", lat: 50.93097, lng: 17.29695, radius: 150 },
+  { name: "Szpital w Oławie", lat: 50.95218066842174, lng: 17.28547078989738, radius: 130 },
+  { name: "Hufiec ZHP Oława", lat: 50.936720853993656, lng: 17.29901856055208, radius: 130 },
+  { name: "Komenda Powiatowa Policji w Oławie", lat: 50.94234391380608, lng: 17.296833905545103, radius: 130 },
+  { name: "Pomnik Stulecia Niepodległości", lat: 50.93385859353967, lng: 17.298018480064037, radius: 130 },
 ];
 
 const MAP_CENTER = [50.9375, 17.2955];
@@ -671,7 +699,9 @@ const quizGame = {
 
         if (isCorrect) {
           finished = true;
-          feedback.textContent = "Poprawnie! Przechodzimy do kolejnej minigry...";
+          feedback.textContent = api.isLastGame()
+            ? "Brawo! Udało ci się ukończyć każdą minigrę!"
+            : "Poprawnie! Przechodzimy do kolejnej minigry...";
           feedback.className = "quiz-feedback ok";
           setTimeout(() => api.completeGame(), 1200);
           return;
@@ -682,8 +712,9 @@ const quizGame = {
 
         if (attemptsUsed >= 2) {
           finished = true;
-          feedback.textContent =
-            "Niestety, znów źle. Zaliczamy minimalne 50 punktów - powodzenia w następnej!";
+          feedback.textContent = api.isLastGame()
+            ? "Niestety, znów źle. Zaliczamy minimalne 50 punktów."
+            : "Niestety, znów źle. Zaliczamy minimalne 50 punktów - powodzenia w następnej!";
           feedback.className = "quiz-feedback bad";
           setTimeout(() => api.completeGame(50), 2000);
         } else {
@@ -801,12 +832,11 @@ const trueFalseGame = {
 
         if (attemptsUsed >= 2) {
           finished = true;
-          feedback.textContent =
-            "Niestety, znów źle. Zaliczamy minimalne 50 punktów - powodzenia w następnej!";
+          feedback.textContent = "Niestety, znów źle. Zaliczamy minimalne 50 punktów - powodzenia w następnej!";
           feedback.className = "tf-feedback bad";
           setTimeout(() => api.completeGame(50), 2000);
         } else {
-          feedback.textContent = "Źle. Kolejne stwierdzenie...";
+          feedback.textContent = "Niestety, zła odpowiedź, spróbuj ponownie...";
           feedback.className = "tf-feedback bad";
           setTimeout(renderStatement, 1400);
         }

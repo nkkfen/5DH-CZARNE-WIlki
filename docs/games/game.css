@@ -146,6 +146,11 @@
   margin-bottom: 28px;
 }
 
+.summary-lorem .highlight {
+  color: var(--red-bright);
+  font-weight: 600;
+}
+
 .summary-label {
   display: block;
   font-size: 0.85rem;
@@ -262,27 +267,20 @@
 /* ---------- Minigra 3: Strzał z łuku ---------- */
 .archery-game {
   text-align: center;
-  max-width: 420px;
+  max-width: 500px;
   width: 100%;
 }
 
-.archery-instructions {
-  color: var(--gray-text);
-  font-size: 0.85rem;
-  margin-bottom: 14px;
-}
-
-.archery-counter {
-  font-family: 'Oswald', sans-serif;
-  color: var(--red-bright);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  margin-bottom: 10px;
+.archery-board {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 460px;
 }
 
 .archery-svg {
+  display: block;
   width: 100%;
-  max-width: 380px;
   height: auto;
   background: var(--gray-dark);
   border: 1px solid var(--gray-line);
@@ -296,18 +294,53 @@
   cursor: grabbing;
 }
 
-.archery-feedback {
-  margin-top: 16px;
-  font-size: 0.9rem;
-  min-height: 1.3em;
-  font-weight: 600;
+/* nakładka na planszy (nie pod nią), żeby powiększona plansza nie
+   wypychała opisu i licznika poza widoczny ekran */
+.archery-overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, rgba(13,13,13,0.85), rgba(13,13,13,0));
+  border-radius: 6px 6px 0 0;
+  pointer-events: none;
 }
 
-.archery-feedback.ok {
+.archery-instructions {
+  color: var(--gray-text);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.archery-counter {
+  font-family: 'Oswald', sans-serif;
+  color: var(--red-bright);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+}
+
+.archery-feedback-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-height: 1.3em;
+  background: linear-gradient(0deg, rgba(13,13,13,0.9), rgba(13,13,13,0));
+  border-radius: 0 0 6px 6px;
+  pointer-events: none;
+}
+
+.archery-feedback-overlay.ok {
   color: #6fbf73;
 }
 
-.archery-feedback.bad {
+.archery-feedback-overlay.bad {
   color: var(--red-bright);
 }
 
