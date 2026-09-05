@@ -12,4 +12,4 @@
  *   backend jest hostowany osobno, niż strona (np. Render/Railway),
  *   a frontend np. na GitHub Pages / Netlify.
  */
-const API_BASE_URL = "";
+const API_BASE_URL = "https://fivedh-czarne-wilki.onrender.com";
