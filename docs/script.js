@@ -16,27 +16,19 @@ const leaderboard = [
   { name: "Grzybek",      score: 470 },
 ];
 
-// wczytuje wyniki zapisane przez graczy w minigrach z backendu (GET /api/leaderboard)
-// i łączy je z domyślną listą, żeby nowe wyniki pojawiały się na tablicy wyników.
-// API_BASE_URL pochodzi z config.js - patrz komentarz w tamtym pliku.
-async function fetchServerScores() {
+// wczytuje wyniki zapisane przez graczy w minigrach (localStorage) i łączy
+// je z domyślną listą, żeby nowe wyniki pojawiały się na tablicy wyników
+function loadStoredScores() {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
-    if (!response.ok) {
-      throw new Error(`Serwer zwrócił błąd (status ${response.status}).`);
-    }
-    return await response.json();
-  } catch (err) {
-    // gdy backend jest niedostępny (np. offline podczas developmentu),
-    // strona nie powinna się wysypać - po prostu pokazujemy same dane domyślne
-    console.warn("Nie udało się pobrać rankingu z backendu, pokazuję dane domyślne.", err);
+    const raw = localStorage.getItem("cwLeaderboard");
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
     return [];
   }
 }
 
-async function getCombinedLeaderboard() {
-  const serverScores = await fetchServerScores();
-  return [...leaderboard, ...serverScores];
+function getCombinedLeaderboard() {
+  return [...leaderboard, ...loadStoredScores()];
 }
 
 function escapeHtml(str) {
@@ -192,8 +184,8 @@ function showPrevPhoto() {
   updateLightboxContent();
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  renderLeaderboard(await getCombinedLeaderboard());
+document.addEventListener("DOMContentLoaded", () => {
+  renderLeaderboard(getCombinedLeaderboard());
   renderGallery(galleryPhotos);
 
   document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
@@ -221,6 +213,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.key === "ArrowRight") showNextPhoto();
     if (e.key === "ArrowLeft") showPrevPhoto();
   });
+
+  // pływający przycisk "Galeria" (mobile) - przewija na sam dół strony,
+  // gdzie znajduje się koniec galerii i pasek kontaktowy
+  const mobileGalleryFab = document.getElementById("mobile-gallery-fab");
+  if (mobileGalleryFab) {
+    mobileGalleryFab.addEventListener("click", () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    });
+  }
 });
 
 /**
