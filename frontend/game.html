@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gra - 5. Drużyna Harcerska "Czarne Wilki"</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="games/game.css">
+</head>
+<body>
+<div class="forest-bg" aria-hidden="true"></div>
+
+<!-- ================= PASEK GRY (nazwa minigry, numer, stoper) ================= -->
+<header class="game-topbar">
+  <div class="container game-topbar-inner">
+    <div class="game-info">
+      <span class="game-count" id="game-count">Minigra 1/6</span>
+      <h1 class="game-name" id="game-name">Nazwa gry</h1>
+    </div>
+    <div class="game-timer">
+      <div class="timer-value" id="timer-value">00:00</div>
+      <div class="timer-label">Wykonaj zadanie jak najszybciej!</div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= KONTENER MINIGRY / PODSUMOWANIA ================= -->
+<main class="container game-container" id="game-container"></main>
+
+<script src="config.js"></script>
+<script src="games/game-engine.js"></script>
+<script src="games/games-data.js"></script>
+</body>
+</html>
