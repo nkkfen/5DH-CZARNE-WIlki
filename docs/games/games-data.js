@@ -749,15 +749,15 @@ const TRUE_FALSE_STATEMENTS = [
     answer: false,
   },
   {
-    statement: "Zaciśnięta pięść w terenie odpowiada mniej więcej 10 stopniom.",
+    statement: "Harcerz jest Skautem",
     answer: true,
   },
   {
-    statement: "Zaciśnięta pięść w terenie odpowiada mniej więcej 1 stopniowi.",
-    answer: false,
+    statement: "Harcerze dzielnie służyli podczas II Wojny Światowej jako ''Szare Szeregi''",
+    answer: true,
   },
   {
-    statement: "Podczas wędrówki, gdyby zabrakło jej w plecaku, największą stratą byłaby butelka wody.",
+    statement: "Przy pakowaniu się, najcięższe rzeczy należy umieścić NA DNIE plecaka",
     answer: true,
   },
   {
@@ -770,7 +770,7 @@ const TRUE_FALSE_STATEMENTS = [
     answer: true,
   },
   {
-    statement: "Gdy przez założony bandaż na ranie nadal przecieka krew, wystarczy nic nie robić.",
+    statement: "Gdy przez założony bandaż na ranie nadal przecieka krew, wystarczy regularnie zdejmować bandaż i przemywać ranę wodą.",
     answer: false,
   },
 ];
