@@ -35,6 +35,24 @@ const GAME_CONFIG = {
  *
  * Jeśli zmieniasz listę słów, zaktualizuj ją w OBU miejscach.
  */
+/**
+ * FILTR WULGARYZMÓW (kopia lekkiej wersji z backend/src/profanityFilter.js).
+ *
+ * UWAGA: to tylko kontrola "dla wygody gracza" - żeby dostał komunikat
+ * od razu, bez czekania na odpowiedź serwera. Prawdziwe, niepodważalne
+ * zabezpieczenie jest po stronie backendu (ten sam filtr w server.js) -
+ * frontend zawsze da się obejść (np. przez konsolę przeglądarki), więc
+ * backend i tak sprawdzi nazwę jeszcze raz przed zapisem do bazy.
+ *
+ * Jeśli zmieniasz listę słów, zaktualizuj ją w OBU miejscach.
+ *
+ * WAŻNE: normalize() zwija powtórzone litery ("kuurwaaa" -> "kurwa").
+ * Rdzenie w PROFANITY_FORBIDDEN_STEMS muszą być znormalizowane TĄ SAMĄ
+ * funkcją (patrz PROFANITY_NORMALIZED_STEMS niżej) - inaczej słowa z
+ * podwójną literą (np. "nigger", "faggot", "asshole") nigdy by się nie
+ * złapały, bo znormalizowane wejście ("niger") nie może zawierać
+ * dłuższego, niezmienionego rdzenia ("nigger").
+ */
 const PROFANITY_LEETSPEAK_MAP = { 0: "o", 1: "i", 3: "e", 4: "a", 5: "s", 7: "t", "@": "a", $: "s" };
 const PROFANITY_DIACRITICS_MAP = { ą: "a", ć: "c", ę: "e", ł: "l", ń: "n", ó: "o", ś: "s", ź: "z", ż: "z" };
 const PROFANITY_FORBIDDEN_STEMS = [
@@ -43,16 +61,24 @@ const PROFANITY_FORBIDDEN_STEMS = [
   "fuck", "shit", "bitch", "cunt", "asshole", "bastard", "nigger", "nigga", "faggot", "whore", "slut", "retard",
 ];
 
-function containsProfanity(text) {
-  if (typeof text !== "string") return false;
-  const normalized = text
+function normalizeProfanityText(text) {
+  return text
     .toLowerCase()
     .split("")
     .map((ch) => PROFANITY_DIACRITICS_MAP[ch] || PROFANITY_LEETSPEAK_MAP[ch] || ch)
     .join("")
     .replace(/[^a-z]/g, "")
     .replace(/(.)\1+/g, "$1");
-  return PROFANITY_FORBIDDEN_STEMS.some((stem) => normalized.includes(stem));
+}
+
+// Rdzenie normalizowane RAZ, przy starcie - tą samą funkcją co wejście
+// (patrz duży komentarz wyżej - to naprawia lukę z "nigger"/"faggot"/"asshole").
+const PROFANITY_NORMALIZED_STEMS = PROFANITY_FORBIDDEN_STEMS.map(normalizeProfanityText);
+
+function containsProfanity(text) {
+  if (typeof text !== "string") return false;
+  const normalized = normalizeProfanityText(text);
+  return PROFANITY_NORMALIZED_STEMS.some((stem) => normalized.includes(stem));
 }
 
 const state = {

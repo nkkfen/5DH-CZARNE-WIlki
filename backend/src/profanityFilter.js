@@ -7,7 +7,9 @@
  *    "leetspeak" (np. 4 -> a), usunięte spacje/kropki/cyfry, zwinięte
  *    powtórzone litery (żeby "kuurwaaa" i "kurwa" wyglądały tak samo).
  * 2. containsProfanity() sprawdza, czy znormalizowany tekst zawiera
- *    którykolwiek z zakazanych "rdzeni" słów (patrz FORBIDDEN_STEMS).
+ *    którykolwiek z zakazanych "rdzeni" słów (patrz FORBIDDEN_STEMS) -
+ *    rdzenie są normalizowane DOKŁADNIE TĄ SAMĄ funkcją co wejście,
+ *    żeby oba porównywane teksty były w tym samym "alfabecie".
  *
  * Rdzenie zamiast całych słów - dzięki temu jeden wpis w liście (np. "kurw")
  * łapie wszystkie odmiany ("kurwa", "kurwo", "kurwy", "kurwiszcze"...).
@@ -16,6 +18,14 @@
  * inteligencja - nie złapie każdej możliwej próby obejścia, ale pokrywa
  * zdecydowaną większość realistycznych przypadków (duże/małe litery,
  * spacje między literami, powtórzone litery, proste podstawienia cyfr).
+ *
+ * WAŻNE: normalize() zwija powtórzone litery ("kuurwaaa" -> "kurwa").
+ * To musi być zastosowane SYMETRYCZNIE - zarówno do sprawdzanego tekstu,
+ * jak i do samej listy FORBIDDEN_STEMS - inaczej każde zakazane słowo
+ * zawierające podwójną literę (np. "nigger", "faggot", "asshole") nigdy
+ * by się nie złapało, bo znormalizowany tekst ("niger") nie może zawierać
+ * dłuższego, niezmienionego rdzenia ("nigger"). Dlatego NORMALIZED_STEMS
+ * jest budowane raz, przy starcie, przez tę samą funkcję normalize().
  */
 
 const LEETSPEAK_MAP = {
@@ -89,10 +99,14 @@ function normalize(text) {
     .replace(/(.)\1+/g, "$1"); // "kuurwaaaa" -> "kurwa" (dowolny ciąg powtórzeń -> 1 litera)
 }
 
+// Rdzenie normalizowane RAZ, przy starcie - tą samą funkcją co wejście,
+// żeby porównanie było symetryczne (patrz duży komentarz u góry pliku).
+const NORMALIZED_FORBIDDEN_STEMS = FORBIDDEN_STEMS.map(normalize);
+
 function containsProfanity(text) {
   if (typeof text !== "string") return false;
   const normalized = normalize(text);
-  return FORBIDDEN_STEMS.some((stem) => normalized.includes(stem));
+  return NORMALIZED_FORBIDDEN_STEMS.some((stem) => normalized.includes(stem));
 }
 
 module.exports = { containsProfanity, normalize };
