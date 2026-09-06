@@ -574,6 +574,14 @@ section {
     text-transform: uppercase;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    opacity: 1;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .mobile-gallery-fab.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(12px);
   }
 
   .mobile-gallery-fab-arrow {

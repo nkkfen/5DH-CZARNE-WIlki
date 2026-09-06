@@ -4,27 +4,39 @@
  * poniższą listę (albo docelowo wczytuj z data/leaderboard.json przez fetch()).
  */
 const leaderboard = [
-  { name: "Wilczek99",    score: 832 },
+  { name: "Wilczek99",    score: 980 },
+  { name: "Sokolica",     score: 915 },
+  { name: "Zuch_Adam",    score: 870 },
   { name: "Kasia_H",      score: 760 },
   { name: "Mlody_Wojtek", score: 705 },
+  { name: "Puszczyk",     score: 660 },
+  { name: "Iskra",        score: 610 },
   { name: "Rysiu",        score: 555 },
-  { name: "Ola Traper",   score: 500 },
-  { name: "Grzybek",      score: 472 },
+  { name: "Ola_Traper",   score: 500 },
+  { name: "Grzybek",      score: 470 },
 ];
 
-// wczytuje wyniki zapisane przez graczy w minigrach (localStorage) i łączy
-// je z domyślną listą, żeby nowe wyniki pojawiały się na tablicy wyników
-function loadStoredScores() {
+// wczytuje wyniki zapisane przez graczy w minigrach z backendu (GET /api/leaderboard)
+// i łączy je z domyślną listą, żeby nowe wyniki pojawiały się na tablicy wyników.
+// API_BASE_URL pochodzi z config.js - patrz komentarz w tamtym pliku.
+async function fetchServerScores() {
   try {
-    const raw = localStorage.getItem("cwLeaderboard");
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
+    const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
+    if (!response.ok) {
+      throw new Error(`Serwer zwrócił błąd (status ${response.status}).`);
+    }
+    return await response.json();
+  } catch (err) {
+    // gdy backend jest niedostępny (np. offline podczas developmentu),
+    // strona nie powinna się wysypać - po prostu pokazujemy same dane domyślne
+    console.warn("Nie udało się pobrać rankingu z backendu, pokazuję dane domyślne.", err);
     return [];
   }
 }
 
-function getCombinedLeaderboard() {
-  return [...leaderboard, ...loadStoredScores()];
+async function getCombinedLeaderboard() {
+  const serverScores = await fetchServerScores();
+  return [...leaderboard, ...serverScores];
 }
 
 function escapeHtml(str) {
@@ -180,8 +192,8 @@ function showPrevPhoto() {
   updateLightboxContent();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderLeaderboard(getCombinedLeaderboard());
+document.addEventListener("DOMContentLoaded", async () => {
+  renderLeaderboard(await getCombinedLeaderboard());
   renderGallery(galleryPhotos);
 
   document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
@@ -217,6 +229,18 @@ document.addEventListener("DOMContentLoaded", () => {
     mobileGalleryFab.addEventListener("click", () => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     });
+
+    // chowamy przycisk, gdy jesteśmy blisko dołu strony (żeby nie zasłaniał
+    // paska kontaktowego), i pokazujemy z powrotem po przewinięciu w górę
+    const NEAR_BOTTOM_PX = 120;
+    function updateFabVisibility() {
+      const distanceFromBottom =
+        document.body.scrollHeight - (window.scrollY + window.innerHeight);
+      mobileGalleryFab.classList.toggle("is-hidden", distanceFromBottom < NEAR_BOTTOM_PX);
+    }
+    updateFabVisibility();
+    window.addEventListener("scroll", updateFabVisibility, { passive: true });
+    window.addEventListener("resize", updateFabVisibility);
   }
 });
 
