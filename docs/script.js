@@ -8,7 +8,7 @@ const leaderboard = [
   { name: "Kasia_H",      score: 760 },
   { name: "Puszczyk",     score: 660 },
   { name: "Ola Traper",   score: 500 },
-  { name: "Santa Clausek",      score: 470 },
+  { name: "Santa Clausek :P",      score: 470 },
 ];
 
 // wczytuje wyniki zapisane przez graczy w minigrach z backendu (GET /api/leaderboard)
